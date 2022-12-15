@@ -1,5 +1,5 @@
 # Generate Your Personal YouTube Report
-<img src="https://i.imgur.com/dKYgeMp.png" alt="avatar" width="571" height="656">
+<img src="https://i.imgur.com/rHaHvyH.png" alt="avatar" width="571" height="656">
 
 ## Getting Started
 
@@ -11,6 +11,9 @@ If you don't already have Python 3+ installed on your computer, download it from
 
 Here you can find out how to download your Google data: https://support.google.com/accounts/answer/3024190?hl=en
 Here you can download all of the data that Google has stored on you: https://takeout.google.com/
+Also,it's totally okay to download following data since script only use them in this repo
+<img src="https://i.imgur.com/UT22gRr.png"  width="500" height="550">
+<img src="https://imgur.com/UT22gRr"  width="500" height="550">
 
 To use this script, you only need to select and download "YouTube", which Google will provide to you as a Zip file by default.
 
@@ -50,5 +53,8 @@ python report.py
 
 The script will generate a file named **YouTube_Report.pdf**. This file will automatically open in your browser once the script completes. Besides, you can find all the images that make up this report in **Images** folder.
 
+Here's the final outlook of entire directory
+<img src="https://i.imgur.com/Pyz9hOt.png" alt="avatar"  style="zoom: 200%;">
+<img src="https://i.imgur.com/mVG1IQe.png" alt="avatar"  style="zoom: 200%;">
 
 
