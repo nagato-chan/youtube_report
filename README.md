@@ -1,5 +1,5 @@
 # Generate Your Personal YouTube Report
-<img src="https://i.ibb.co/H255wkD/You-Tube-Report-1.png" alt="avatar" width="571" height="656">
+<img src="https://i.imgur.com/dKYgeMp.png" alt="avatar" width="571" height="656">
 
 ## Getting Started
 
