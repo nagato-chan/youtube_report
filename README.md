@@ -13,7 +13,7 @@ Here you can find out how to download your Google data: https://support.google.c
 Here you can download all of the data that Google has stored on you: https://takeout.google.com/
 Also,it's totally okay to download following data since script only use them in this repo
 <img src="https://i.imgur.com/UT22gRr.png"  width="500" height="550">
-<img src="https://i.imgur.com/UT22gRr"  width="500" height="550">
+<img src="https://i.imgur.com/UT22gRr.png"  width="500" height="550">
 
 To use this script, you only need to select and download "YouTube", which Google will provide to you as a Zip file by default.
 
