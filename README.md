@@ -55,6 +55,6 @@ The script will generate a file named **YouTube_Report.pdf**. This file will aut
 
 Here's the final outlook of entire directory
 <img src="https://i.imgur.com/Pyz9hOt.png" alt="avatar"  style="zoom: 50%;">
-<img src="https://i.imgur.com/mVG1IQe.png" alt="avatar"  style="zoom: 50%;">
+<img src="https://i.imgur.com/8SSxi33.png" alt="avatar"  style="zoom: 50%;">
 
 
