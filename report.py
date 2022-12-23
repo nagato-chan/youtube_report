@@ -399,7 +399,7 @@ class TakeoutReport(TakeoutHTMLReader):
         df_lang_json = df_lang.to_json(orient='records')
 
         return {
-            "video_detail": json.loads(df_json),
+            # "video_detail": json.loads(df_json),
             # dfz_json,
             "topic": json.loads(df_calc_times_json),
             "category_duration_detail": json.loads(df_calc_duration_json),
@@ -410,7 +410,7 @@ class TakeoutReport(TakeoutHTMLReader):
             "top5": json.loads(top5_json),
             "year_detail": json.loads(df_yr_json),
             "stat": json.loads(dfstat_json),
-            "annual_video_detail": json.loads(df_yr_dlc_json),
+            # "annual_video_detail": json.loads(df_yr_dlc_json),
         }
         # csv相关
 
