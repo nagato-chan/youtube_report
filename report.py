@@ -318,7 +318,6 @@ class TakeoutReport(TakeoutHTMLReader):
         df_lang.reset_index(inplace=True)
         df_lang.columns = ['language', 'lanCounts']
         df_lang.drop(df_lang[df_lang['language'] == 'N/A'].index, inplace=True)
-        print(df_lang)
         # csv相关
         other = 0
         if len(df_lang) < 3:

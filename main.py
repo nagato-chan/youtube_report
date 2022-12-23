@@ -43,7 +43,7 @@ async def upload(file: UploadFile, res: Response, background_tasks: BackgroundTa
         res.status_code = status.HTTP_400_BAD_REQUEST
         return {"error": "File too large or not a zip file."}
     else:
-        dirname = f'./upload/{int(time.time())}-{file.filename}'
+        dirname = f'{os.getcwd()}/upload/{int(time.time())}-{file.filename}'
         file_to_read = BytesIO(file.file.read())
         zipfile.ZipFile(file_to_read, 'r').extractall(dirname)
         api_key = os.getenv("YOUTUBE_API_KEY")
