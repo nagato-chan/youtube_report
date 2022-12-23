@@ -1,4 +1,5 @@
 # Generate Your Personal YouTube Report
+
 <img src="https://i.imgur.com/u7BZQNr.png" alt="avatar" width="571" height="656">
 <img src="https://i.imgur.com/RVpM6yM.png" alt="avatar" width="571" height="278">
 
@@ -6,12 +7,16 @@
 
 ### 1. Install Python 3+
 
-If you don't already have Python 3+ installed on your computer, download it from https://www.python.org/downloads/. 
+If you don't already have Python 3+ installed on your computer, download it from <https://www.python.org/downloads/>.
+
+Tool that you need:
+
+- pipenv
 
 ### 2. Get Your YouTube Data
 
-Here you can find out how to download your Google data: https://support.google.com/accounts/answer/3024190?hl=en
-Here you can download all of the data that Google has stored on you: https://takeout.google.com/
+Here you can find out how to download your Google data: <https://support.google.com/accounts/answer/3024190?hl=en>
+Here you can download all of the data that Google has stored on you: <https://takeout.google.com/>
 Also,it's totally okay to download following data since script only use them in this repo
 <img src="https://i.imgur.com/UT22gRr.png" alt="avatar" width="571" height="656">
 <img src="https://i.imgur.com/nDXiP12.png" alt="avatar" width="571" height="656">
@@ -22,15 +27,13 @@ To use this script, you only need to select and download "YouTube", which Google
 
 ### 3. Clone This Repository
 
-On https://github.com/A3M4/Personal-YouTube-Report-Generator, click the green "Clone or Download" button at the top right of the page. Then, click the "Download ZIP" button, and extract the ZIP somewhere on your computer.
+On <https://github.com/A3M4/Personal-YouTube-Report-Generator>, click the green "Clone or Download" button at the top right of the page. Then, click the "Download ZIP" button, and extract the ZIP somewhere on your computer.
 
-NOTE: Make sure to set your [Google Account language ](https://support.google.com/accounts/answer/32047)to English before downloading
+NOTE: Make sure to set your [Google Account language](https://support.google.com/accounts/answer/32047)to English before downloading
 
 ### 4. Extract the Takeout File
 
 Extract the Takeout File(from step 2) and move it to the repository folder(from step 3). Now the files in Repository folder look like below.
-
-
 
 <img src="https://i.ibb.co/R4D5yHn/Screenshot-2.png" alt="avatar" style="zoom: 200%;" />
 
@@ -57,5 +60,3 @@ The script will generate a file named **YouTube_Report.pdf**. This file will aut
 Here's the final outlook of entire directory
 <img src="https://i.imgur.com/Pyz9hOt.png" alt="avatar"  style="zoom: 50%;">
 <img src="https://i.imgur.com/8SSxi33.png" alt="avatar"  style="zoom: 50%;">
-
-

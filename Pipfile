@@ -13,6 +13,11 @@ pillow = "*"
 wordcloud = "*"
 reportlab = "*"
 pypdf2 = "*"
+fastapi = "0.88"
+calmap = "*"
+python-dotenv = "*"
+python-multipart = "*"
+google-api-python-client = "*"
 
 [requires]
-python_version = "3.7"
+# python_version = "3.7"

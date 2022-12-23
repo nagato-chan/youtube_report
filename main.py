@@ -1,57 +1,62 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, BackgroundTasks, Response, status
 from typing import Union
 import json
 import os
 import pandas as pd
-
+from report import TakeoutReport
+import dotenv
+import tempfile
+import time
+import zipfile
+from io import BytesIO
+import uuid
+from fastapi.logger import logger
 app = FastAPI()
+dotenv.load_dotenv()
 
-csv_dir = os.getcwd()+'/csv_file/'
-df_yr = pd.read_csv(csv_dir+'info_yr.csv',encoding='utf_8_sig',index_col=0)
-df_yr_dlc = pd.read_csv(csv_dir+'info_yr_dlc.csv',encoding='utf_8_sig',index_col=0)
-df_yr_misc = pd.read_csv(csv_dir+'info_misc_yr.csv',encoding='utf_8_sig',index_col=0)
-df_api_rep = pd.read_csv(csv_dir+'api_rep.csv',encoding='utf_8_sig',index_col=0)
-df_top5Watch = pd.read_csv(csv_dir+'TOP5_watch.csv',encoding='utf_8_sig',index_col=0)
+QUEUE_BUFFER = {}
+
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
-
-def info_yr():
-    res = df_yr.to_json(orient="records")
-    parsed = json.loads(res)
-    return parsed
-@app.get("/yr")
-async def load_csv():
-    return info_yr()
-
-def info_yr_dlc():
-    res = df_yr_dlc.to_json(orient="records")
-    parsed = json.loads(res)
-    return parsed
-@app.get("/yrdlc")
-async def load_csv():
-    return info_yr_dlc()
-
-def miscinfo():
-    res = df_yr_misc.to_json(orient="records")
-    parsed = json.loads(res)
-    return parsed
-@app.get("/miscinfo")
-async def load_csv():
-    return miscinfo()
-
-def statrank():
-    res = df_api_rep.to_json(orient="records")
-    parsed = json.loads(res)
-    return parsed
-@app.get("/statrank")
-async def load_csv():
-    return statrank()
-
-@app.get("/top5")
-async def top5():
-    return df_top5Watch
+    return {"message": "Pong"}
 
 
+def generate_report(api_key, dirname, id_generated: uuid.UUID):
+    QUEUE_BUFFER[str(id_generated)] = {"ready": False}
+    logger.info("report added to queue buffer, id: {}".format(id_generated))
+    time.sleep(10)
+    takeout = TakeoutReport(
+        api_key, dirname).generate_report()
+    logger.info("report generated, id: {}".format(id_generated))
+    QUEUE_BUFFER[str(id_generated)] = {"takeout": TakeoutReport(
+        api_key, dirname).generate_report(), "ready": True}
 
+
+@app.post("/upload")
+async def upload(file: UploadFile, res: Response, background_tasks: BackgroundTasks):
+    if file.__sizeof__() > 10 * 1024 * 1024 or file.content_type != "application/zip":
+        res.status_code = status.HTTP_400_BAD_REQUEST
+        return {"error": "File too large or not a zip file."}
+    else:
+        dirname = f'./upload/{int(time.time())}-{file.filename}'
+        file_to_read = BytesIO(file.file.read())
+        zipfile.ZipFile(file_to_read, 'r').extractall(dirname)
+        api_key = os.getenv("YOUTUBE_API_KEY")
+        id_generated = uuid.uuid4()
+        background_tasks.add_task(
+            generate_report, api_key, dirname, id_generated)
+        return {"id": id_generated}
+
+
+@app.get("/data/")
+async def get_data(id: str, response: Response):
+    # print(id, QUEUE_BUFFER)
+    if id in QUEUE_BUFFER:
+        data = QUEUE_BUFFER[id]
+        if data["ready"]:
+            del QUEUE_BUFFER[id]
+        return {"id": id, "data": data}
+    else:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {"error": "id not found"}
