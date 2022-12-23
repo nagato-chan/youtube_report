@@ -54,37 +54,19 @@ INDICT = {
 
 
 class TakeoutReport(TakeoutHTMLReader):
-    api_key = None
+    api_keys = []
 
     # youtube api
     # TODO: Switch to dotenv
     opener = build_opener()
     opener.addheaders = [('User-Agent', USER_AGENT)]
 
-    def __init__(self, api_key: str, path: str):
-        self.api_key = api_key
+    def __init__(self, api_keys: list[str], path: str):
+
+        self.api_keys = api_keys
         TakeoutHTMLReader.__init__(self, path)
 
     # YouTube api请求函数
-
-    def call_gdata(self, api_route, qs):
-        """Make a request to the youtube api."""
-        qs = dict(qs)
-        qs['key'] = self.api_key
-        url = PFX + api_route + '?' + urlencode(qs, safe=',')
-        url = url.replace('%2C', ',')
-        try:
-            data = self.opener.open(url).read().decode('utf-8')
-        except HTTPError as e:
-            try:
-                errdata = e.text.read().decode()
-                error = json.loads(errdata)['error']['message']
-                errmsg = 'Youtube Error %d: %s' % (e.getcode(), error)
-            except:
-                errmsg = str(e)
-        dataz = json.loads(data)
-        return url, dataz
-
     def generate_report(self):
         # 实例化parse中的各个函数
         urls_id = self.find_video_id()
@@ -129,15 +111,15 @@ class TakeoutReport(TakeoutHTMLReader):
 
         # 第一张热力图（github版）
 
-        def generate_heatmap():
-            watch_time = []
-            for i in df_new['watch_time']:
-                watch_time.append(i)
+        # def generate_heatmap():
+        #     watch_time = []
+        #     for i in df_new['watch_time']:
+        #         watch_time.append(i)
 
-            values = []
-            for i in df_new['values']:
-                values.append(i)
-            ts = pd.Series(values, index=pd.DatetimeIndex(watch_time))
+        #     values = []
+        #     for i in df_new['values']:
+        #         values.append(i)
+        #     ts = pd.Series(values, index=pd.DatetimeIndex(watch_time))
 
         # BASIC
         # if (len(channel_link) == 0):
@@ -243,10 +225,14 @@ class TakeoutReport(TakeoutHTMLReader):
         api_service_name = "youtube"
         api_version = "v3"
 
-        youtube = googleapiclient.discovery.build(
-            api_service_name, api_version, developerKey=self.api_key)
+        api_keys = self.api_keys
         id_count = 0
-        for i in range(0, len(ids), 50):
+        key_used = 0
+
+        def processing(id_count: int, i: int):
+            youtube = googleapiclient.discovery.build(
+                api_service_name, api_version, developerKey=self.api_keys[key_used])
+
             id_list = ids.to_list()[i:i+50]
             id_string = ','.join(id_list)
             # print(i, len(id_string))
@@ -267,12 +253,6 @@ class TakeoutReport(TakeoutHTMLReader):
                     else:
                         s1_[k] = 'N/A'
                 # 将带有zh、en的字符串转化zh、en
-                # p1 = re.compile(r'zh.*')
-                # p2 = re.compile(r'en.*')
-                # if p1.search(s1_['defaultAudioLanguage']):
-                #     s1_['defaultAudioLanguage'] = 'cn'
-                # elif p2.search(s1_['defaultAudioLanguage']):
-                #     s1_['defaultAudioLanguage'] = 'en'
                 # 将带有zh、en的字符串转化zh、en
                 # 获取duration
                 s2 = item.get('contentDetails', {})
@@ -285,6 +265,16 @@ class TakeoutReport(TakeoutHTMLReader):
                 dataz = list(sz.values())
                 df_yr_dlc.loc[id_count, :] = dataz
                 id_count += 1
+
+        for i in range(0, len(ids), 50):
+            try:
+                processing(id_count, i)
+            except:
+                key_used += 1
+                if key_used+1 == len(api_keys):
+                    raise Exception('API keys used up')
+                processing(id_count, i)
+                continue
 
         # 将duration数据转为00:00:00格式
         for i, j in df_yr_dlc['duration'].items():

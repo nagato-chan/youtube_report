@@ -46,10 +46,12 @@ async def upload(file: UploadFile, res: Response, background_tasks: BackgroundTa
         dirname = f'{os.getcwd()}/upload/{int(time.time())}-{file.filename}'
         file_to_read = BytesIO(file.file.read())
         zipfile.ZipFile(file_to_read, 'r').extractall(dirname)
-        api_key = os.getenv("YOUTUBE_API_KEY")
+        # api_key = os.getenv("YOUTUBE_API_KEY")
         id_generated = uuid.uuid4()
+        keysFile = open(f'{os.getcwd()}/keys.txt', 'r')
+        keys = keysFile.readlines()
         background_tasks.add_task(
-            generate_report, api_key, dirname, id_generated)
+            generate_report, keys, dirname, id_generated)
         return {"id": id_generated}
 
 
