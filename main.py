@@ -11,6 +11,7 @@ import zipfile
 from io import BytesIO
 import uuid
 from fastapi.logger import logger
+
 app = FastAPI()
 dotenv.load_dotenv()
 
@@ -25,7 +26,6 @@ async def root():
 def generate_report(api_key, dirname, id_generated: uuid.UUID):
     QUEUE_BUFFER[str(id_generated)] = {"ready": False}
     logger.info("report added to queue buffer, id: {}".format(id_generated))
-    time.sleep(10)
     takeout = TakeoutReport(
         api_key, dirname).generate_report()
     logger.info("report generated, id: {}".format(id_generated))
@@ -54,8 +54,8 @@ async def get_data(id: str, response: Response):
     # print(id, QUEUE_BUFFER)
     if id in QUEUE_BUFFER:
         data = QUEUE_BUFFER[id]
-        if data["ready"]:
-            del QUEUE_BUFFER[id]
+        # if data["ready"]:
+        # del QUEUE_BUFFER[id]
         return {"id": id, "data": data}
     else:
         response.status_code = status.HTTP_404_NOT_FOUND
