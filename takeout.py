@@ -6,7 +6,7 @@ import pytz
 import pandas as pd
 import time
 
-YOUTUBE_TAKEOUT_DATA_DIR = "YouTube and YouTube Music"
+YOUTUBE_TAKEOUT_DATA_DIR = "Takeout/YouTube and YouTube Music"
 HISTORY_LIKED_VIDEOS = "playlists/Liked videos.csv"
 HISTORY_WATCHED_DIR = "history/watch-history.html"
 HISTORY_SEARCHED_DIR = "history/search-history.html"
