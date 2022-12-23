@@ -267,12 +267,12 @@ class TakeoutReport(TakeoutHTMLReader):
                     else:
                         s1_[k] = 'N/A'
                 # 将带有zh、en的字符串转化zh、en
-                p1 = re.compile(r'zh.*')
-                p2 = re.compile(r'en.*')
-                if p1.search(s1_['defaultAudioLanguage']):
-                    s1_['defaultAudioLanguage'] = 'cn'
-                elif p2.search(s1_['defaultAudioLanguage']):
-                    s1_['defaultAudioLanguage'] = 'en'
+                # p1 = re.compile(r'zh.*')
+                # p2 = re.compile(r'en.*')
+                # if p1.search(s1_['defaultAudioLanguage']):
+                #     s1_['defaultAudioLanguage'] = 'cn'
+                # elif p2.search(s1_['defaultAudioLanguage']):
+                #     s1_['defaultAudioLanguage'] = 'en'
                 # 将带有zh、en的字符串转化zh、en
                 # 获取duration
                 s2 = item.get('contentDetails', {})
@@ -318,6 +318,7 @@ class TakeoutReport(TakeoutHTMLReader):
         df_lang.reset_index(inplace=True)
         df_lang.columns = ['language', 'lanCounts']
         df_lang.drop(df_lang[df_lang['language'] == 'N/A'].index, inplace=True)
+        print(df_lang)
         # csv相关
         other = 0
         if len(df_lang) < 3:

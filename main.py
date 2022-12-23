@@ -12,7 +12,11 @@ from io import BytesIO
 import uuid
 from fastapi.logger import logger
 
-app = FastAPI()
+app = FastAPI(title="Branche Winter Activity",
+              description="""
+The first Branche winter is coming...
+            """)
+
 dotenv.load_dotenv()
 
 QUEUE_BUFFER = {}
@@ -33,7 +37,7 @@ def generate_report(api_key, dirname, id_generated: uuid.UUID):
         api_key, dirname).generate_report(), "ready": True}
 
 
-@app.post("/upload")
+@app.post("/upload", summary="NOTE: Required to be protected")
 async def upload(file: UploadFile, res: Response, background_tasks: BackgroundTasks):
     if file.__sizeof__() > 10 * 1024 * 1024 or file.content_type != "application/zip":
         res.status_code = status.HTTP_400_BAD_REQUEST

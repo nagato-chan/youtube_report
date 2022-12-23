@@ -1,7 +1,0 @@
-numpy
-seaborn
-matplotlib
-Pillow
-wordcloud
-reportlab
-PyPDF2
