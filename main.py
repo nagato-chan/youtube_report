@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, BackgroundTasks, Response, status
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Union
 import json
 import os
@@ -20,6 +21,16 @@ The first Branche winter is coming...
 dotenv.load_dotenv()
 
 QUEUE_BUFFER = {}
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=[""],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
