@@ -44,8 +44,7 @@ def generate_report(api_key, dirname, id_generated: uuid.UUID):
     takeout = TakeoutReport(
         api_key, dirname).generate_report()
     logger.info("report generated, id: {}".format(id_generated))
-    QUEUE_BUFFER[str(id_generated)] = {"takeout": TakeoutReport(
-        api_key, dirname).generate_report(), "ready": True}
+    QUEUE_BUFFER[str(id_generated)] = {"takeout": takeout, "ready": True}
 
 
 @app.post("/upload", summary="NOTE: Required to be protected")
