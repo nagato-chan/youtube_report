@@ -421,6 +421,7 @@ def id_name(id):
 # 时间格式化函数
 
 
+# 时间格式化函数
 def time_format(str):
     num_list = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
     str = str.replace('Sept', 'Sep')
@@ -453,10 +454,10 @@ def time_format(str):
 
 # 处理&打开文件，
 # where store the picture
-image_dir = os.path.join(os.getcwd(), "Images/")
+# image_dir = os.path.join(os.getcwd(), "Images/")
 # Youtube LOGO
-logo = os.path.join(image_dir, "LOGO.png")
+# logo = os.path.join(image_dir, "LOGO.png")
 # CSV File DIR
-csv_dir = os.getcwd()+'/csv_file/'
-if not os.path.exists(csv_dir):
-    os.mkdir(csv_dir)
+# csv_dir = os.getcwd()+'/csv_file/'
+# if not os.path.exists(csv_dir):
+#     os.mkdir(csv_dir)
