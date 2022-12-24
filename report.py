@@ -266,8 +266,13 @@ class TakeoutReport(TakeoutHTMLReader):
 
         # 将duration数据转为seconds
         for i, j in df_yr_dlc['duration'].items():
-            df_yr_dlc.loc[i, 'duration'] = int(
-                isodate.parse_duration(j).total_seconds())
+            if j == 'N/A':
+                continue
+            else:
+                total_seconds = int(
+                    isodate.parse_duration(j).total_seconds())
+                # Limit duration to 20 minutes if the video is longer than 20 minutes
+                df_yr_dlc.loc[i, 'duration'] = total_seconds if total_seconds < 20*60 else 20*60
 
         df_yr_dlc = df_yr_dlc.reindex(columns=['title', 'publishedAt', 'categoryId', 'duration', 'licensedContent',
                                                'viewCount', 'likeCount', 'commentCount', 'defaultAudioLanguage'])
