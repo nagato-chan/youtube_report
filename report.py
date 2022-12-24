@@ -400,7 +400,7 @@ class TakeoutReport(TakeoutHTMLReader):
             "top5": json.loads(top5_json),
             "year_detail": json.loads(df_yr_json),
             "stat": json.loads(dfstat_json),
-            # "annual_video_detail": json.loads(df_yr_dlc_json),
+            "annual_video_detail": json.loads(df_yr_dlc_json),
         }
         # csv相关
 
