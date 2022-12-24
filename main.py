@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, BackgroundTasks, Response, status
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Union
 import json
 import os
@@ -22,13 +23,13 @@ dotenv.load_dotenv()
 
 QUEUE_BUFFER = {}
 
-origins = ['*']
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=[""],
     allow_headers=["*"],
 )
 
@@ -43,8 +44,7 @@ def generate_report(api_key, dirname, id_generated: uuid.UUID):
     takeout = TakeoutReport(
         api_key, dirname).generate_report()
     logger.info("report generated, id: {}".format(id_generated))
-    QUEUE_BUFFER[str(id_generated)] = {"takeout": TakeoutReport(
-        api_key, dirname).generate_report(), "ready": True}
+    QUEUE_BUFFER[str(id_generated)] = {"takeout": takeout, "ready": True}
 
 
 @app.post("/upload", summary="NOTE: Required to be protected")
