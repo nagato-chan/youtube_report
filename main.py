@@ -12,6 +12,7 @@ import zipfile
 from io import BytesIO
 import uuid
 from fastapi.logger import logger
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Branche Winter Activity",
               description="""
@@ -31,7 +32,6 @@ app.add_middleware(
     allow_methods=[""],
     allow_headers=["*"],
 )
-
 
 @app.get("/")
 async def root():

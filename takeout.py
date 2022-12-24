@@ -6,7 +6,7 @@ import pytz
 import pandas as pd
 import time
 
-YOUTUBE_TAKEOUT_DATA_DIR = "YouTube and YouTube Music"
+YOUTUBE_TAKEOUT_DATA_DIR = "Takeout/YouTube and YouTube Music"
 HISTORY_LIKED_VIDEOS = "playlists/Liked videos.csv"
 HISTORY_WATCHED_DIR = "history/watch-history.html"
 HISTORY_SEARCHED_DIR = "history/search-history.html"
@@ -22,6 +22,7 @@ class TakeoutHTMLReader:
     # 下面的watch history的id/title/date_time可与video_id一并写入一个函数，从而直接输出三列的df而无需在report中分别再处理它们
     def __init__(self, path: str) -> None:
         self.root = path
+        self.html_comment = ""
         # Takeout Root Directory
         self.takeout_root_dir = os.path.join(
             self.root, YOUTUBE_TAKEOUT_DATA_DIR)
@@ -218,11 +219,12 @@ class TakeoutHTMLReader:
         for i in match_list2:
             time_list.append(i[0])
             comments_list.append(i[1])
-        df1 = pd.DataFrame(comments_list)
-        df2 = pd.DataFrame(time_list)
-        df_comments = pd.concat([df1, df2], axis=1)
-        df_comments.columns = ['COMMENTS', 'DATE_TIME']
-        link = match_list1[-1][9:-2]
+        #df1 = pd.DataFrame(comments_list)
+        #df2 = pd.DataFrame(time_list)
+        #df_comments = pd.concat([df1, df2], axis=1)
+        df_comments = pd.DataFrame({'COMMENTS':comments_list,'DATE_TIME':time_list})
+        #df_comments.columns = ['COMMENTS', 'DATE_TIME']
+        #link = match_list1[-1][9:-2]
         return df_comments
         # except Exception:
         # pass
