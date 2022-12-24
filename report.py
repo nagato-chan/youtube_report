@@ -122,8 +122,11 @@ class TakeoutReport(TakeoutHTMLReader):
             k = time_format(j)
             df_searches.loc[i, 'DATE_TIME'] = k
         # 过滤非2022年数据
-        df_searches_yr = df_searches[df_searches['DATE_TIME'].str.contains(
-            '2022')]
+        if df_searches.shape[0] != 0:
+            df_searches_yr = df_searches[df_searches['DATE_TIME'].str.contains(
+                '2022')]
+        else:
+            df_searches_yr = df_searches
 
         # 实例化comment
         try:
@@ -141,7 +144,9 @@ class TakeoutReport(TakeoutHTMLReader):
         try:
             df_likes = self.like_history()
         except FileNotFoundError:
-            df_likes = pd.DataFrame()
+            logger.info("No like history found")
+            df_likes = pd.DataFrame(
+                columns=["liked_video_id", 'liked_video_url', "liked_time"])
         # 过滤非2022年数据
         df_likes_yr = df_likes[df_likes['liked_time'].str.contains('2022')]
 

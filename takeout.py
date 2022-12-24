@@ -50,8 +50,12 @@ class TakeoutHTMLReader:
 
         with open(self.watch_history_dir, "r", encoding="utf-8") as f:
             self.html_watch = f.read()
-        with open(self.search_history_dir, "r", encoding="utf-8") as f:
-            self.html_search = f.read()
+        try:
+            with open(self.search_history_dir, "r", encoding="utf-8") as f:
+                self.html_search = f.read()
+        except Exception:
+            logger.info(
+                "Could not parse search history. It appears that there are no search history.")
         try:
             with open(self.comments_history_dir, "r", encoding="utf-8") as f:
                 self.html_comment = f.read()
