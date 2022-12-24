@@ -11,6 +11,7 @@ import zipfile
 from io import BytesIO
 import uuid
 from fastapi.logger import logger
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Branche Winter Activity",
               description="""
@@ -21,6 +22,15 @@ dotenv.load_dotenv()
 
 QUEUE_BUFFER = {}
 
+origins = ['*']
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def root():

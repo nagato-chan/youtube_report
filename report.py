@@ -142,8 +142,11 @@ class TakeoutReport(TakeoutHTMLReader):
         except TypeError:
             all_links = ""
         # 过滤非2022年数据
-        df_comments_yr = df_comments[df_comments['DATE_TIME'].str.contains(
+        if df_comments.shape[0] != 0:
+            df_comments_yr = df_comments[df_comments['DATE_TIME'].str.contains(
             '2022')]
+        else:
+            df_comments_yr = df_comments
 
         # 实例化like
         try:
