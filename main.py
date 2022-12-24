@@ -1,3 +1,5 @@
+# from asyncio.log import logger
+import sys
 from fastapi import FastAPI, File, UploadFile, BackgroundTasks, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Union
@@ -11,7 +13,9 @@ import time
 import zipfile
 from io import BytesIO
 import uuid
-from fastapi.logger import logger
+import logging
+# from fastapi.logger import logger
+import uvicorn.logging
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Branche Winter Activity",
@@ -33,6 +37,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+logger = logging.getLogger("uvicorn.default")
+
+
 @app.get("/")
 async def root():
     return {"message": "Pong"}
@@ -40,7 +47,8 @@ async def root():
 
 def generate_report(api_key, dirname, id_generated: uuid.UUID):
     QUEUE_BUFFER[str(id_generated)] = {"ready": False}
-    logger.info("report added to queue buffer, id: {}".format(id_generated))
+
+    logger.info(f"report added to queue buffer, id: {str(id_generated)}")
     takeout = TakeoutReport(
         api_key, dirname).generate_report()
     logger.info("report generated, id: {}".format(id_generated))

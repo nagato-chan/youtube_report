@@ -18,6 +18,8 @@ calmap = "*"
 python-dotenv = "*"
 python-multipart = "*"
 google-api-python-client = "*"
+python-dateutil = "*"
+isodate = "*"
 
 [requires]
 # python_version = "3.7"

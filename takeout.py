@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import logging
 import re
 import os
 import datetime
@@ -13,6 +14,7 @@ HISTORY_SEARCHED_DIR = "history/search-history.html"
 HISTORY_COMMENTS_DIR = "my-comments/my-comments.html"
 PLAYLISTS_DIR = "playlists"
 
+logger = logging.getLogger("uvicorn.default")
 missing = []
 
 
@@ -54,7 +56,8 @@ class TakeoutHTMLReader:
             with open(self.comments_history_dir, "r", encoding="utf-8") as f:
                 self.html_comment = f.read()
         except Exception:
-            print("Could not parse comments.")
+            logger.info(
+                "Could not parse comments. It appears that there are no comments.")
 
     def find_video_id(self):
         video_id = []
@@ -219,12 +222,13 @@ class TakeoutHTMLReader:
         for i in match_list2:
             time_list.append(i[0])
             comments_list.append(i[1])
-        #df1 = pd.DataFrame(comments_list)
-        #df2 = pd.DataFrame(time_list)
-        #df_comments = pd.concat([df1, df2], axis=1)
-        df_comments = pd.DataFrame({'COMMENTS':comments_list,'DATE_TIME':time_list})
-        #df_comments.columns = ['COMMENTS', 'DATE_TIME']
-        #link = match_list1[-1][9:-2]
+        # df1 = pd.DataFrame(comments_list)
+        # df2 = pd.DataFrame(time_list)
+        # df_comments = pd.concat([df1, df2], axis=1)
+        df_comments = pd.DataFrame(
+            {'COMMENTS': comments_list, 'DATE_TIME': time_list})
+        # df_comments.columns = ['COMMENTS', 'DATE_TIME']
+        # link = match_list1[-1][9:-2]
         return df_comments
         # except Exception:
         # pass

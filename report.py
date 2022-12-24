@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import logging
 import os
 import re
 import datetime
@@ -10,6 +11,8 @@ from urllib.parse import urlencode
 import json
 import googleapiclient.discovery
 import math
+from dateutil import parser
+import isodate
 # __version__ = "0.5.5"
 # __author__ = "np1"
 # __license__ = "LGPLv3"
@@ -52,6 +55,8 @@ INDICT = {
     44: 'Trailers'
 }
 
+logger = logging.getLogger("uvicorn.default")
+
 
 class TakeoutReport(TakeoutHTMLReader):
     api_keys = []
@@ -62,12 +67,13 @@ class TakeoutReport(TakeoutHTMLReader):
     opener.addheaders = [('User-Agent', USER_AGENT)]
 
     def __init__(self, api_keys: list[str], path: str):
-
         self.api_keys = api_keys
         TakeoutHTMLReader.__init__(self, path)
 
     # YouTube api请求函数
     def generate_report(self):
+
+        logger.info("generating report")
         # 实例化parse中的各个函数
         urls_id = self.find_video_id()
         channel_link = self.find_channel_link()
@@ -109,23 +115,6 @@ class TakeoutReport(TakeoutHTMLReader):
         df_new.columns = ['watch_time', 'values']
         active_day = df_new['watch_time'].count()
 
-        # 第一张热力图（github版）
-
-        # def generate_heatmap():
-        #     watch_time = []
-        #     for i in df_new['watch_time']:
-        #         watch_time.append(i)
-
-        #     values = []
-        #     for i in df_new['values']:
-        #         values.append(i)
-        #     ts = pd.Series(values, index=pd.DatetimeIndex(watch_time))
-
-        # BASIC
-        # if (len(channel_link) == 0):
-        #     raise ValueError(
-        #         "Could not find any links. Please send the developer your takeout data, so the issue can be addressed")
-
         # 实例化search
         df_searches = self.search_history()
         for i, j in df_searches['DATE_TIME'].items():
@@ -144,7 +133,7 @@ class TakeoutReport(TakeoutHTMLReader):
         # 过滤非2022年数据
         if df_comments.shape[0] != 0:
             df_comments_yr = df_comments[df_comments['DATE_TIME'].str.contains(
-            '2022')]
+                '2022')]
         else:
             df_comments_yr = df_comments
 
@@ -156,8 +145,18 @@ class TakeoutReport(TakeoutHTMLReader):
         # 过滤非2022年数据
         df_likes_yr = df_likes[df_likes['liked_time'].str.contains('2022')]
 
+        df_yr = pd.concat([df_video_title, df_urls_id,
+                          df_channel_link, df_channel_title, df_time], axis=1)
+        df_yr.columns = ['video_title', 'video_id', 'video_link',
+                         'channel_link', 'channel_title', 'watch_time', 'time_day']
+        # filter 2022
+        df_yr = df_yr[df_yr['watch_time'].str.contains('2022')]
+        df_yr.drop(['time_day'], axis=1, inplace=True)
+        # Convert to datetime
+        for i, j in df_yr['watch_time'].items():
+            df_yr.loc[i, 'watch_time'] = parser.parse(j).strftime('%Y-%m-%d')
         # 观看数
-        watched_video = len(urls_id)
+        watched_video = len(df_yr['video_id'])
         # 搜索数
         searches_yr = df_searches_yr['SEARCHES'].count()
         # 点赞数
@@ -178,35 +177,21 @@ class TakeoutReport(TakeoutHTMLReader):
         # csv相关
 
         # TOP5_WATCH
-        url_sizes = df_urls_id.groupby("video_id").size()
+        url_sizes = df_yr.groupby("video_id").size()
         sorted_watch = dict(url_sizes.sort_values(
-            ascending=False))        # 下面都是导出csv
-        df = pd.concat([df_video_title, df_urls_id, df_channel_link,
-                        df_channel_title, df_time, df_searches, df_likes, df_comments], axis=1)
-        df.columns = ['video_title', 'video_id', 'video_link', 'channel_link', 'df_channel_title', 'watch_time', 'time_day',
-                      'searches', 'searches_link', 'search_time', 'liked_video_id', 'liked_video_link', 'liked_time', 'comments',
-                      'comment_time']
-        df.drop(['time_day'], axis=1, inplace=True)
-        df_yr = pd.concat([df_video_title, df_urls_id, df_channel_link, df_channel_title, df_time, df_searches_yr, df_likes_yr,
-                           df_comments_yr], axis=1)
-        df_yr.columns = ['video_title', 'video_id', 'video_link', 'channel_link', 'channel_title', 'watch_time', 'time_day',
-                         'searches', 'searches_link', 'search_time', 'liked_video_id', 'liked_video_link', 'liked_time', 'comments',
-                         'comment_time']
-        df_yr.drop(['time_day'], axis=1, inplace=True)
-        # 上面都是导出csv
-        # csv相关
+            ascending=False))
+
         df_sorted_watch = pd.DataFrame(sorted_watch, index=[0]).T
         df_sorted_watch.reset_index(inplace=True)
         df_sorted_watch.columns = ['video_id', 'watch_time']
         df_top5 = pd.DataFrame({'watch_time_rank': [0], 'video_id': [
             0], 'video_link': [0], 'watch_times': [0], 'video_title': [0]})
 
-        # print(df_sorted_watch)
         for i in range(5):
 
             find_title = df_yr[df_yr['video_id'] ==
                                df_sorted_watch.iloc[i, 0]].iloc[0, 0]
-            # print(df_yr, df_sorted_watch.iloc[i, 0], df_yr.iloc[92, :])
+
             list_top5 = ['TOP'+str(i+1), df_sorted_watch.iloc[i, 0],
                          'https://www.youtube.com/watch?v=' +
                          str(df_sorted_watch.iloc[i, 0]),
@@ -232,14 +217,12 @@ class TakeoutReport(TakeoutHTMLReader):
         id_count = 0
         key_used = 0
 
+        # 50个id一组
         def processing(id_count: int, i: int):
             youtube = googleapiclient.discovery.build(
                 api_service_name, api_version, developerKey=self.api_keys[key_used])
-
             id_list = ids.to_list()[i:i+50]
             id_string = ','.join(id_list)
-            # print(i, len(id_string))
-
             request = youtube.videos().list(part='snippet,contentDetails', id=id_string)
             response = request.execute()
             # print(response)
@@ -255,8 +238,6 @@ class TakeoutReport(TakeoutHTMLReader):
                         continue
                     else:
                         s1_[k] = 'N/A'
-                # 将带有zh、en的字符串转化zh、en
-                # 将带有zh、en的字符串转化zh、en
                 # 获取duration
                 s2 = item.get('contentDetails', {})
                 s2_names = ['duration', 'licensedContent']
@@ -270,41 +251,48 @@ class TakeoutReport(TakeoutHTMLReader):
                 id_count += 1
 
         for i in range(0, len(ids), 50):
+            # print(i)
             try:
                 processing(id_count, i)
+                id_count += 50
             except:
                 key_used += 1
+                logger.info(
+                    f'Current API key is exceeded the quota, using next API key. Key count: {key_used}')
                 if key_used+1 == len(api_keys):
                     raise Exception('API keys used up')
                 processing(id_count, i)
                 continue
 
-        # 将duration数据转为00:00:00格式
+        # 将duration数据转为seconds
         for i, j in df_yr_dlc['duration'].items():
-            hours_pattern = re.compile(r'(\d+)H')
-            minutes_pattern = re.compile(r'(\d+)M')
-            seconds_pattern = re.compile(r'(\d+)S')
-            hours = hours_pattern.search(j)
-            minutes = minutes_pattern.search(j)
-            seconds = seconds_pattern.search(j)
-            hours = int(hours.group(1)) if hours else 0
-            minutes = int(minutes.group(1)) if minutes else 0
-            seconds = int(seconds.group(1)) if seconds else 0
-            s = f'{hours}:{minutes}:{seconds}'
-            df_yr_dlc.loc[i, 'duration'] = s
+            df_yr_dlc.loc[i, 'duration'] = int(
+                isodate.parse_duration(j).total_seconds())
 
         df_yr_dlc = df_yr_dlc.reindex(columns=['title', 'publishedAt', 'categoryId', 'duration', 'licensedContent',
                                                'viewCount', 'likeCount', 'commentCount', 'defaultAudioLanguage'])
 
         # 下面都是导出csv
-        df_json = df.to_json()
-        df_yr_json = df_yr.to_json(orient="records")
-        df_yr_dlc_json = df_yr_dlc.to_json()
         dfstat_json = dfstat_yr.to_json()
         # 上面都是导出csv
 
-        # 下面所有处理都是以df_yr_dlc为
-
+        # 下面所有处理都是以df_yr_dlc为基础
+        # duration (<1min, 1-5min, 5-10min, >10min)
+        df_duration = df_yr_dlc.reindex(columns=['duration'])
+        # print(df_duration)
+        # I know it's a bit ugly
+        below_one_minute = len(df_duration[df_duration['duration'] < 60])
+        one_to_five = len(df_duration[(df_duration['duration'] >= 60) & (
+            df_duration['duration'] < 300)])
+        five_to_ten = len(df_duration[(df_duration['duration'] >= 300) & (
+            df_duration['duration'] < 600)])
+        above_ten = len(df_duration[df_duration['duration'] >= 600])
+        df_duration_json = {
+            'below_one_minute': below_one_minute,
+            'one_to_five': one_to_five,
+            'five_to_ten': five_to_ten,
+            'above_ten': above_ten
+        }
         # language
         df_lang = pd.DataFrame(dict(
             df_yr_dlc['defaultAudioLanguage'].value_counts(ascending=False)), index=[0]).T
@@ -337,39 +325,37 @@ class TakeoutReport(TakeoutHTMLReader):
         # categoryWatchTimes
         # insert a new columns 'duration in seconds'
         df_api_dlc.insert(5, 'durations', value='NaN')
-        # 转化为秒数计和
+
         for i, j in df_api_dlc['duration'].items():
-            j = str(j)
-            p = re.compile(r'(\d+):(\d+):(\d+)')
-            s = p.search(j)
-            h = int(s.group(1))
-            m = int(s.group(2))
-            s = int(s.group(3))
-            total = h*60 + m*60 + s
-            df_api_dlc.loc[i, 'durations'] = total
+            df_api_dlc.loc[i, 'durations'] = j
+
+        # Generate category watch times
         df_calc_times = pd.DataFrame(df_api_dlc["categoryName"].value_counts())
         df_calc_times.reset_index(inplace=True)
         df_calc_times.columns = ['categoryName', 'watchTimes1']
-
         df_calc_times.dropna()
+
         # 类别观看时长（in minutes）
         dict_catDu = {}
         for i in INDICT.keys():
             if i == 0:
                 continue
             dfid = df_api_dlc[df_api_dlc['categoryId'] == str(i)]
-            # print(dfid['durations'])
-            dict_catDu[id_name(i)] = dfid['durations'].sum() * 0.34
+            dict_catDu[id_name(i)] = dfid['durations'].sum()
         df_total_duration = pd.DataFrame(dict_catDu, index=[0]).T
         df_total_duration.reset_index(inplace=True)
         df_total_duration.columns = ['categoryName', 'watchTime_min']
         for i, j in df_total_duration['watchTime_min'].items():
             df_total_duration.iloc[i, 1] = '{:.2f}'.format(j/60)
             df_total_duration.iloc[i, 1] = float(df_total_duration.iloc[i, 1])
+        # sort by watchTime_min
         df_total_duration.sort_values(
             ['watchTime_min'], ascending=False, inplace=True)
         df_total_duration.reset_index(inplace=True, drop=True)
-        # df_cat = pd.concat([df_calc_times, df_total_duration], axis=1)
+
+        # heatmap
+        heatmap = df_yr.groupby('watch_time').size()
+        heatmap_json = heatmap.to_json()
 
         # 频道观看次数
         df_chnlSize = pd.DataFrame(df_yr["channel_title"].value_counts())
@@ -390,7 +376,9 @@ class TakeoutReport(TakeoutHTMLReader):
         # df_cat_json = df_cat.to_json()
         df_chnl_size_json = df_chnlSize.to_json(orient='records')
         df_lang_json = df_lang.to_json(orient='records')
-
+        videos_words = df_yr['video_title'].tolist()
+        comments_words = df_comments_yr['COMMENTS'].tolist()
+        searches_words = df_searches_yr['SEARCHES'].tolist()
         return {
             # "video_detail": json.loads(df_json),
             # dfz_json,
@@ -401,9 +389,16 @@ class TakeoutReport(TakeoutHTMLReader):
             "lang": json.loads(df_lang_json),
 
             "top5": json.loads(top5_json),
-            "year_detail": json.loads(df_yr_json),
+            # "year_detail": json.loads(df_yr_json),
             "stat": json.loads(dfstat_json),
-            "annual_video_detail": json.loads(df_yr_dlc_json),
+            "heatmap": json.loads(heatmap_json),
+            "wordcloud": {
+                "videos": videos_words,
+                "comments": comments_words,
+                "searches": searches_words,
+            },
+            # "annual_video_detail": json.loads(df_yr_dlc_json),
+            "duration": df_duration_json,
         }
         # csv相关
 
