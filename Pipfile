@@ -20,6 +20,7 @@ python-multipart = "*"
 google-api-python-client = "*"
 python-dateutil = "*"
 isodate = "*"
+sqlalchemy = "*"
 
 [requires]
 # python_version = "3.7"

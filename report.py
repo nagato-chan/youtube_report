@@ -61,11 +61,6 @@ logger = logging.getLogger("uvicorn.default")
 class TakeoutReport(TakeoutHTMLReader):
     api_keys = []
 
-    # youtube api
-    # TODO: Switch to dotenv
-    opener = build_opener()
-    opener.addheaders = [('User-Agent', USER_AGENT)]
-
     def __init__(self, api_keys: list[str], path: str):
         self.api_keys = api_keys
         TakeoutHTMLReader.__init__(self, path)
@@ -106,8 +101,9 @@ class TakeoutReport(TakeoutHTMLReader):
         time_day_list = []
         for i in df_time['watch_time']:
             match = re.match(r"\d{4}\-\d{2}\-\d{2}", i)
-            i = match.group()
-            time_day_list.append(i)
+            if match is not None:
+                i = match.group()
+                time_day_list.append(i)
         df_time['watch_time_day'] = time_day_list
 
         df_new = pd.DataFrame(df_time.groupby(
