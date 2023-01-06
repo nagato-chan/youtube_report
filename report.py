@@ -144,7 +144,10 @@ class TakeoutReport(TakeoutHTMLReader):
             df_likes = pd.DataFrame(
                 columns=["liked_video_id", 'liked_video_url', "liked_time"])
         # 过滤非2022年数据
-        df_likes_yr = df_likes[df_likes['liked_time'].str.contains('2022')]
+        if df_likes.shape[0] >0:
+            df_likes_yr = df_likes[df_likes['liked_time'].str.contains('2022')]
+        else:
+            df_likes_yr = df_likes
 
         df_yr = pd.concat([df_video_title, df_urls_id,
                           df_channel_link, df_channel_title, df_time], axis=1)
